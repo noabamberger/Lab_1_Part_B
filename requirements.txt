@@ -1,6 +1,10 @@
+--extra-index-url https://download.pytorch.org/whl/cu121
 # Pin NumPy <2: the lab/grading conda env ships scipy/scikit-learn/faiss compiled
 # against NumPy 1.x, and NumPy 2's changed C ABI breaks them (sentence-transformers
 # imports sklearn->scipy at import time). All of our code is NumPy-1.x compatible.
 numpy>=1.24,<2
-sentence-transformers>=2.2.0
+sentence-transformers==5.6.0
 faiss-cpu>=1.7.4
+
+# Target CUDA 12.1 wheels for PyTorch
+torch==2.5.1+cu121
