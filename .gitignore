@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Dev scratch: large cached embeddings / corpus dumps used only for experiments.
+# Regenerate with `python dev/build_cache.py`.
+dev/cache/
+
+# Local env
+.venv/
+venv/
+.DS_Store
