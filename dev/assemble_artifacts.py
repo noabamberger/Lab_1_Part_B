@@ -15,10 +15,10 @@ import numpy as np
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from index import (  # noqa: E402
+from core.index import (  # noqa: E402
     BM25_NAME, CONFIG_NAME, DEFAULT_ALPHA, PAGE_IDS_NAME, PAGE_VECTORS_NAME,
 )
-from lexical import BM25Index  # noqa: E402
+from core.lexical import BM25Index  # noqa: E402
 from utils import ensure_artifacts_dir, entry_text, iter_entries  # noqa: E402
 
 CACHE = ROOT / "dev" / "cache"

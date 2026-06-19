@@ -59,11 +59,11 @@ query ──▶ │  Dense  (MiniLM + FAISS) ──┐                          
 
 | Stage | Module | Method |
 |-------|--------|--------|
-| **Chunk** | `chunk.py` | One unit **per whole page** (title + content). Windowed chunking *underperformed* — answer pages are short, so windows only dilute the page signal and let a long distractor win on a stray window. |
-| **Embed** | `embed.py` | `all-MiniLM-L6-v2`, L2-normalized (cosine = inner product). |
-| **Index** | `index.py`, `lexical.py`, `stemmer.py` | **Dense:** FAISS `IndexFlatIP` over page vectors. **Lexical:** a custom NumPy **BM25** (`k1=2.0, b=0.75`) with **Porter stemming** plus two corpus-specific features — *decade tokens* (`1826`→`182x`, so "the 1820s" matches an exact-year page) and *word bigrams* (so "point guard", "cold-water fisheries" match as phrases). |
-| **Retrieve** | `retrieve.py` | Dense and BM25 scores are each per-query **min-max normalized** and fused `0.7·dense + 0.3·bm25` into a candidate pool. |
-| **Rerank** | `reranker.py` | A cross-encoder (`ms-marco-MiniLM-L-6-v2`) rescores the top **120** candidates; the result is blended `0.6·reranker + 0.4·hybrid` and the top-10 returned. |
+| **Chunk** | `core/chunk.py` | One unit **per whole page** (title + content). Windowed chunking *underperformed* — answer pages are short, so windows only dilute the page signal and let a long distractor win on a stray window. |
+| **Embed** | `core/embed.py` | `all-MiniLM-L6-v2`, L2-normalized (cosine = inner product). |
+| **Index** | `core/index/`, `core/lexical/` | **Dense:** FAISS `IndexFlatIP` over page vectors. **Lexical:** a custom NumPy **BM25** (`k1=2.0, b=0.75`) with **Porter stemming** plus two corpus-specific features — *decade tokens* (`1826`→`182x`, so "the 1820s" matches an exact-year page) and *word bigrams* (so "point guard", "cold-water fisheries" match as phrases). |
+| **Retrieve** | `core/retrieve/` | Dense and BM25 scores are each per-query **min-max normalized** and fused `0.7·dense + 0.3·bm25` into a candidate pool. |
+| **Rerank** | `core/reranker.py` | A cross-encoder (`ms-marco-MiniLM-L-6-v2`) rescores the top **120** candidates; the result is blended `0.6·reranker + 0.4·hybrid` and the top-10 returned. |
 
 ---
 
@@ -153,18 +153,31 @@ aligned if you rebuild.
 
 ## 🗂️ Layout
 
+The production code is an OOP package (`core/`) organized around single-responsibility
+modules — one class per file — with abstractions (`PageScorer`, `Reranker`) the
+pipeline depends on, so a new retrieval signal or reranker can be swapped in without
+touching the orchestration. The three grading-contract files (`main.py`, `utils.py`,
+`eval.py`) stay at the repo root.
+
 ```
-main.py          run(queries) entry point        ← autograder calls this
-retrieve.py      query-time hybrid fusion + reranking
-embed.py         MiniLM embedding helpers
-reranker.py      cross-encoder reranker wrapper
-lexical.py       BM25 (stemming + decade + bigram features)
-stemmer.py       dependency-free Porter stemmer
-chunk.py         page → retrieval unit(s)
-index.py         offline build + load of artifacts
-utils.py         paths, corpus / query loaders
-eval.py          NDCG@10                          ← read-only
-scripts/         build_index.py, eval_public.py   ← read-only
-artifacts/       prebuilt index (committed)
-dev/             reproducible experiments behind the design (not used at runtime)
+main.py                 run(queries) entry point          ← autograder calls this
+utils.py                paths, corpus / query loaders
+eval.py                 NDCG@10                            ← read-only
+
+core/                   production pipeline package
+  interfaces.py         PageScorer / Reranker abstractions (depend on roles, not classes)
+  embed.py              MiniLM embedding model
+  reranker.py           cross-encoder reranker
+  chunk.py              page → retrieval unit(s)
+  lexical/              tokenizer.py · bm25.py · stemmer.py   (BM25 + Porter stemming)
+  index/                config.py · loaded_index.py · builder.py · loader.py   (offline build/load)
+  retrieve/             normalizer.py · dense.py · fusion.py · pipeline.py · service.py   (query time)
+
+scripts/                build_index.py, eval_public.py
+artifacts/              prebuilt index (committed)
+dev/                    reproducible experiments behind the design (not used at runtime)
 ```
+
+Each subpackage re-exports its public API through `__init__.py` (lazily, so importing
+the light pieces — BM25, the stemmer, the score normalizer — doesn't pull in the
+embedding/reranking stack).

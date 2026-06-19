@@ -26,10 +26,10 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 import faiss  # noqa: E402
-from index import load_index  # noqa: E402
-from embed import embed_queries  # noqa: E402
-from reranker import score_pairs  # noqa: E402
-from lexical import tokenize, MAX_DOC_TOKENS  # noqa: E402
+from core.index import load_index  # noqa: E402
+from core.embed import embed_queries  # noqa: E402
+from core.reranker import score_pairs  # noqa: E402
+from core.lexical import tokenize, MAX_DOC_TOKENS  # noqa: E402
 from utils import load_public_queries, iter_entries, entry_text  # noqa: E402
 
 K1S = [1.0, 1.5, 2.0]

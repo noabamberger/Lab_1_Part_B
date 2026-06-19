@@ -15,7 +15,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from embed import embed_texts  # noqa: E402
+from core.embed import embed_texts  # noqa: E402
 from utils import entry_text, iter_entries  # noqa: E402
 
 CACHE = ROOT / "dev" / "cache"

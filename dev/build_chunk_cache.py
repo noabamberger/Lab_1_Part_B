@@ -14,8 +14,8 @@ import numpy as np
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from chunk import chunk_corpus  # noqa: E402
-from embed import get_model  # noqa: E402
+from core.chunk import chunk_corpus  # noqa: E402
+from core.embed import get_model  # noqa: E402
 from utils import iter_entries  # noqa: E402
 
 CACHE = ROOT / "dev" / "cache"
