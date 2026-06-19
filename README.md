@@ -17,7 +17,7 @@
 ## 🚀 Quickstart
 
 ```bash
-cd "Section B"
+cd "Lab_1_Part_B"
 pip install -r requirements.txt      # numpy · sentence-transformers · faiss-cpu
 ```
 
