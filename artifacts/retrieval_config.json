@@ -1,12 +1,12 @@
 {
-  "alpha": 0.9,
+  "alpha": 0.7,
   "model": "sentence-transformers/all-MiniLM-L6-v2",
   "num_pages": 27074,
   "reranker": {
     "enabled": true,
     "model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
     "pool": 120,
-    "weight": 0.7,
+    "weight": 0.6,
     "max_length": 512
   }
 }
